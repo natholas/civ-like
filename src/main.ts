@@ -1,37 +1,10 @@
 import { Application, Assets, Renderer, Sprite } from "pixi.js";
 import { generateSeededRandom } from "./lib/seeded-random";
-
-type TileType =
-  | "grass"
-  | "water"
-  | "sand"
-  | "forest"
-  | "mountain"
-  | "mountainPeak";
-
-interface GameTile {
-  sprite?: Sprite;
-  type: TileType;
-  offset: [number, number];
-  leftNeighbor?: GameTile;
-  topLeftNeighbor?: GameTile;
-  topRightNeighbor?: GameTile;
-  rightNeighbor?: GameTile;
-  bottomLeftNeighbor?: GameTile;
-  bottomRightNeighbor?: GameTile;
-}
-
-type NeighborSide =
-  | "left"
-  | "right"
-  | "topLeft"
-  | "topRight"
-  | "bottomLeft"
-  | "bottomRight";
+import { MAP_SIZE, TILE_TYPE_WEIGHTS, TYPE_TOUCH_MAP } from "./config";
+import { GameTile, NeighborSide, TileType } from "./types";
 
 const tiles: GameTile[] = [];
 
-const mapSize = 8;
 const seed = parseInt(new URLSearchParams(location.search).get("seed") || "1");
 const seededRandom = generateSeededRandom(seed);
 
@@ -44,30 +17,12 @@ const textures = {
   mountainPeak: await Assets.load("/assets/tile-mountain-peak.svg"),
 } as const;
 
-const typeTouchMap: { [type: string]: TileType[] } = {
-  grass: ["grass", "forest", "sand", "mountain"],
-  water: ["water", "sand"],
-  sand: ["sand", "water", "grass"],
-  forest: ["forest", "grass", "mountain"],
-  mountain: ["mountain", "forest", "grass", "mountainPeak"],
-  mountainPeak: ["mountainPeak", "mountain"],
-};
-
-const tileTypeWeights: { [key: string]: number } = {
-  grass: 5,
-  water: 5,
-  sand: 3,
-  forest: 2,
-  mountain: 1,
-  mountainPeak: 2,
-};
-
 const allTypes = Object.keys(textures) as TileType[];
 
 const tileWidth =
   Math.floor(
     ((Math.min(window.innerWidth, window.innerHeight * 1.1547005) /
-      (mapSize * 2 + 1)) *
+      (MAP_SIZE * 2 + 1)) *
       0.9) /
       2
   ) * 2;
@@ -118,7 +73,7 @@ const getValidTileTypes = (tile: GameTile): TileType[] => {
   const validTypes = new Set<TileType>(allTypes);
 
   neighborTypes.forEach((type) => {
-    const canTouch = typeTouchMap[type];
+    const canTouch = TYPE_TOUCH_MAP[type];
     validTypes.forEach((vt) => {
       if (!canTouch.includes(vt)) {
         validTypes.delete(vt);
@@ -133,7 +88,7 @@ const addWeightingToTileTypes = (types: TileType[]) => {
   const weightedTypes: TileType[] = [];
 
   types.forEach((type) => {
-    for (let i = 0; i < tileTypeWeights[type]; i += 1) {
+    for (let i = 0; i < TILE_TYPE_WEIGHTS[type]; i += 1) {
       weightedTypes.push(type);
     }
   });
@@ -170,16 +125,6 @@ const generateTile = (app: Application<Renderer>, tile: GameTile) => {
   // Add the bunny to the stage
   app.stage.addChild(sprite);
 };
-
-// const cleanUpTile = (tile: GameTile) => {
-//   const neighbors = getTileNeighbors(tile);
-//   const neighborTypes = getTypesForTiles(neighbors);
-//   if (tile.type === "sand") {
-//     if (neighborTypes.size === 1) {
-//       tile.type = Array.from(neighborTypes.values())[0];
-//     }
-//   }
-// };
 
 const connectNeighbors = (
   tile: GameTile,
@@ -326,33 +271,20 @@ const growMap = () => {
 };
 
 (async () => {
-  // Create a new application
   const app = new Application();
-
-  // Initialize the application
   await app.init({ background: "#333", resizeTo: window });
-
-  // Append the application canvas to the document body
   document.getElementById("pixi-container")?.appendChild(app.canvas);
+
   const centerTile = addTile([0, 0]);
   centerTile.type = "grass";
-  for (let i = 0; i < mapSize; i++) {
-    growMap();
-  }
-
+  for (let i = 0; i < MAP_SIZE; i++) growMap();
   tiles.forEach((tile) => calcType(tile));
-  // tiles.forEach((tile) => cleanUpTile(tile));
-
   for (const tile of tiles) {
     generateTile(app, tile);
     // await new Promise((resolve) => setTimeout(() => resolve(undefined), 10));
   }
 
-  // Listen for animate update
   // app.ticker.add((time) => {
-  //   // Just for fun, let's rotate mr rabbit a little.
-  //   // * Delta is 1 if running at 100% performance *
-  //   // * Creates frame-independent transformation *
   //   bunny.rotation += 0.1 * time.deltaTime;
   // });
 })();
