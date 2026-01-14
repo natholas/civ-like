@@ -1,4 +1,4 @@
-export const generateSeededRandom = (seed: number) => {
+const generateSeededRandom = (seed: number) => {
   return function () {
     let t = (seed += 0x6d2b79f5);
     t = Math.imul(t ^ (t >>> 15), t | 1);
@@ -6,3 +6,6 @@ export const generateSeededRandom = (seed: number) => {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 };
+
+const seed = parseInt(new URLSearchParams(location.search).get("seed") || "1");
+export const seededRandom = generateSeededRandom(seed);
