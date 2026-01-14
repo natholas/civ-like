@@ -1,4 +1,5 @@
 import { Application, Assets, Renderer, Sprite } from "pixi.js";
+import { generateSeededRandom } from "./lib/seeded-random";
 
 type TileType =
   | "grass"
@@ -31,6 +32,8 @@ type NeighborSide =
 const tiles: GameTile[] = [];
 
 const mapSize = 8;
+const seed = parseInt(new URLSearchParams(location.search).get("seed") || "1");
+const seededRandom = generateSeededRandom(seed);
 
 const textures = {
   grass: await Assets.load("/assets/tile-grass.svg"),
@@ -143,7 +146,7 @@ const calcType = (tile: GameTile) => {
   const validTypes = getValidTileTypes(tile);
   if (!validTypes.length) return "grass";
   const weightedTypes = addWeightingToTileTypes(validTypes);
-  tile.type = weightedTypes[Math.floor(Math.random() * weightedTypes.length)];
+  tile.type = weightedTypes[Math.floor(seededRandom() * weightedTypes.length)];
 };
 
 const generateTile = (app: Application<Renderer>, tile: GameTile) => {
@@ -342,7 +345,7 @@ const growMap = () => {
 
   for (const tile of tiles) {
     generateTile(app, tile);
-    await new Promise((resolve) => setTimeout(() => resolve(undefined), 10));
+    // await new Promise((resolve) => setTimeout(() => resolve(undefined), 10));
   }
 
   // Listen for animate update
