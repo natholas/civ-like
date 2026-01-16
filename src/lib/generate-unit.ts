@@ -5,6 +5,7 @@ import {
   COLORS,
   UNIT_BASE_HEALTH,
   UNIT_ICON_SIZE,
+  UNIT_INDICATOR_OFFSET,
   UNIT_OFFSET,
 } from "../config";
 import { tileHeight, tileWidth } from "./map-generation";
@@ -48,16 +49,16 @@ export const generateUnit = (
   tile.units.push(unit);
 
   const indicator = new Graphics();
-  indicator.circle(0, -120, 32);
+  indicator.circle(0, -UNIT_INDICATOR_OFFSET, 32);
   indicator.fill({ color: COLORS.unitIndicatorBorder });
   indicator.closePath();
 
   const iconSprite = new Sprite(iconTextures[unit.type]);
   iconSprite.anchor.set(0.5);
-  iconSprite.position.set(0, -120);
+  iconSprite.position.set(0, -UNIT_INDICATOR_OFFSET);
   iconSprite.scale.set(0.25);
 
-  indicator.circle(0, -120, 28);
+  indicator.circle(0, -UNIT_INDICATOR_OFFSET, 28);
 
   indicator.fill({ color: player.color });
 

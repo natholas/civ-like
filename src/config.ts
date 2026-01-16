@@ -4,9 +4,10 @@ import { ResourceType, TileType } from "./types";
 export const MAP_SIZE = 3;
 export const PLAYER_COUNT = 2;
 
-export const RESOURCE_ICON_SIZE = 0.7;
-export const UNIT_ICON_SIZE = 0.5;
+export const RESOURCE_ICON_SIZE = 0.4;
+export const UNIT_ICON_SIZE = 0.6;
 export const UNIT_OFFSET = 0.1;
+export const UNIT_INDICATOR_OFFSET = 100;
 
 export const TILE_TYPE_WEIGHTS: { [key: string]: number } = {
   grass: 5,
@@ -62,6 +63,13 @@ export const UNIT_BASE_HEALTH: {
 } = {
   builder: 100,
   soldier: 200,
+};
+
+export const UNIT_PASSIVE_MAP: {
+  [type: string]: boolean;
+} = {
+  builder: true,
+  soldier: false,
 };
 
 export const PLAYER_COLORS: Color[] = [
