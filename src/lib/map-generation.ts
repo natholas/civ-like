@@ -8,7 +8,7 @@ import {
 } from "../config";
 import { GameTile, NeighborSide, ResourceType, TileType } from "../types";
 import { seededRandom } from "./seeded-random";
-import { textures } from "./textures";
+import { resourceTextures, tileTextures } from "./textures";
 import { getTileNeighbors } from "./get-tile-neighbors";
 
 export const tileWidth =
@@ -24,7 +24,6 @@ export const tileHeight = tileWidth * 1.1547005;
 const resourceIconSize = Math.floor(tileWidth * RESOURCE_ICON_SIZE);
 
 const allTypes = Object.keys(TILE_TYPE_WEIGHTS) as TileType[];
-// const allResources = Object.keys(RESOURCE_TILE_MAP) as ResourceType[];
 
 const addTile = (tiles: GameTile[], offset: [number, number]) => {
   if (
@@ -93,7 +92,7 @@ const calcType = (tile: GameTile) => {
 
 const generateTile = (app: Application<Renderer>, tile: GameTile) => {
   // Create a bunny Sprite
-  const texture = textures[tile.type];
+  const texture = tileTextures[tile.type];
   const sprite = new Sprite(texture);
   sprite.width = tileWidth;
   sprite.height = tileHeight;
@@ -119,7 +118,7 @@ const generateResource = (
   type: ResourceType
 ) => {
   // Create a bunny Sprite
-  const texture = textures[type];
+  const texture = resourceTextures[type];
   const sprite = new Sprite(texture);
   sprite.width = resourceIconSize;
   sprite.height = resourceIconSize;
@@ -152,7 +151,7 @@ const connectNeighbors = (
     }
     if (tile.bottomRightNeighbor) {
       tile.bottomRightNeighbor.topRightNeighbor = newTile;
-      newTile.bottomLeftNeighbor = tile.bottomLeftNeighbor;
+      newTile.bottomLeftNeighbor = tile.bottomRightNeighbor;
     }
   }
 

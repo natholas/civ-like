@@ -1,4 +1,4 @@
-import { Sprite } from "pixi.js";
+import { Color, Sprite } from "pixi.js";
 
 export type TileType = "grass" | "water" | "sand" | "mountain" | "mountainPeak";
 
@@ -16,6 +16,8 @@ export interface GameUnit {
   sprite: Sprite;
   tile: GameTile;
   tilesMovedThisTurn: number;
+  player: GamePlayer;
+  health: number;
 }
 
 export interface GameTile {
@@ -30,6 +32,13 @@ export interface GameTile {
   rightNeighbor?: GameTile;
   bottomLeftNeighbor?: GameTile;
   bottomRightNeighbor?: GameTile;
+}
+
+export interface GamePlayer {
+  name: string;
+  units: GameUnit[];
+  active: boolean;
+  color: Color;
 }
 
 export type NeighborSide =

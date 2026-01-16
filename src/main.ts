@@ -1,13 +1,16 @@
-import { Application, Renderer, Sprite } from "pixi.js";
+import { Application, Graphics, Renderer, Sprite } from "pixi.js";
 import { generateMap, tileHeight, tileWidth } from "./lib/map-generation";
-import { GameTile, GameUnit, UnitType } from "./types";
+import { GamePlayer, GameTile, GameUnit, UnitType } from "./types";
 import { generateUnit } from "./lib/generate-unit";
 import { generateMovementIndicators } from "./lib/generate-movement-indicators";
 import { findPathLength } from "./lib/find-path-length";
-import { UNIT_MOVEMENTS } from "./config";
+import { UNIT_MOVEMENTS, UNIT_OFFSET } from "./config";
+import { createTileOutline } from "./lib/create-tile-outline";
+import { generatePlayers } from "./lib/generate-players";
 
 let selectedUnit: GameUnit | undefined;
 let movementIndicators: { sprite: Sprite; tile: GameTile }[] = [];
+let movementBorder: Graphics;
 
 const unselectUnit = () => {
   if (!selectedUnit) return;
@@ -16,6 +19,7 @@ const unselectUnit = () => {
     indicator.sprite.destroy();
   });
   movementIndicators = [];
+  movementBorder.destroy();
   selectedUnit = undefined;
 };
 
@@ -33,7 +37,9 @@ const moveUnit = (
   unit.tile = tile;
   unit.sprite.position.set(
     app.screen.width / 2 + tile.offset[0] * tileWidth,
-    app.screen.height / 2 + tile.offset[1] * tileHeight
+    app.screen.height / 2 +
+      tile.offset[1] * tileHeight +
+      tileHeight * UNIT_OFFSET
   );
   tile.units.push(unit);
   unit.tilesMovedThisTurn += pathLength;
@@ -44,6 +50,10 @@ const selectUnit = (app: Application<Renderer>, unit: GameUnit) => {
   selectedUnit = unit;
   selectedUnit.sprite.alpha = 0.5;
   movementIndicators = generateMovementIndicators(app, unit);
+  movementBorder = createTileOutline(app, [
+    ...movementIndicators.map((i) => i.tile),
+    unit.tile,
+  ]);
   movementIndicators.forEach((indicator) => {
     indicator.sprite.interactive = true;
     indicator.sprite.on("click", () => {
@@ -53,43 +63,52 @@ const selectUnit = (app: Application<Renderer>, unit: GameUnit) => {
   });
 };
 
-const endTurn = (units: GameUnit[]) => {
+const endTurn = (players: GamePlayer[]) => {
   unselectUnit();
-  units.forEach((unit) => {
+  const activePlayerIndex = players.findIndex((p) => p.active);
+  players[activePlayerIndex].units.forEach((unit) => {
     unit.tilesMovedThisTurn = 0;
   });
+  players[activePlayerIndex].active = false;
+  const newActivePlayerIndex =
+    activePlayerIndex === players.length - 1 ? 0 : activePlayerIndex + 1;
+  players[newActivePlayerIndex].active = true;
 };
 
 const spawnUnit = (
   app: Application<Renderer>,
-  units: GameUnit[],
+  players: GamePlayer[],
   tile: GameTile,
   type: UnitType
 ) => {
-  const unit = generateUnit(app, tile, type);
+  const activePlayer = players.find((p) => p.active)!;
+  const unit = generateUnit(app, tile, type, activePlayer);
   unit.sprite.interactive = true;
   unit.sprite.on("click", () => {
-    selectUnit(app, unit);
+    const activePlayer = players.find((p) => p.active);
+    if (activePlayer === unit.player) {
+      selectUnit(app, unit);
+    }
   });
-  units.push(unit);
+  activePlayer.units.push(unit);
 };
 
 const setupUi = (
   app: Application<Renderer>,
-  units: GameUnit[],
+  players: GamePlayer[],
   centerTile: GameTile
 ) => {
   const endTurnButton = document.getElementById("end-turn-button");
   endTurnButton!.onclick = () => {
-    endTurn(units);
+    endTurn(players);
   };
   const spawnBuilderButton = document.getElementById("spawn-builder-button");
   spawnBuilderButton!.onclick = () => {
-    spawnUnit(app, units, centerTile, "builder");
+    spawnUnit(app, players, centerTile, "builder");
   };
   const spawnSoldierButton = document.getElementById("spawn-soldier-button");
   spawnSoldierButton!.onclick = () => {
-    spawnUnit(app, units, centerTile, "soldier");
+    spawnUnit(app, players, centerTile, "soldier");
   };
 };
 
@@ -102,11 +121,14 @@ const setupUi = (
   });
   document.getElementById("pixi-container")?.appendChild(app.canvas);
 
+  const players = generatePlayers();
   const { centerTile } = generateMap(app);
 
-  const units: GameUnit[] = [];
+  setupUi(app, players, centerTile);
 
-  setupUi(app, units, centerTile);
+  // const unit = generateUnit(app, centerTile, "builder");
+
+  // selectUnit(app, unit);
 
   // app.ticker.add((time) => {
   //   // tiles.forEach((tile) => {

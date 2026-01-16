@@ -2,7 +2,7 @@ import { Application, Renderer, Sprite } from "pixi.js";
 import { UNIT_MOVEMENTS } from "../config";
 import { GameTile, GameUnit } from "../types";
 import { getTileNeighbors } from "./get-tile-neighbors";
-import { textures } from "./textures";
+import { miscTextures } from "./textures";
 import { tileHeight, tileWidth } from "./map-generation";
 
 const calcMovementTiles = (unit: GameUnit) => {
@@ -36,7 +36,7 @@ export const generateMovementIndicators = (
   const tiles = calcMovementTiles(unit);
 
   return tiles.map((tile) => {
-    const sprite = new Sprite(textures["movementIndicator"]);
+    const sprite = new Sprite(miscTextures["empty"]);
     sprite.width = tileWidth;
     sprite.height = tileHeight;
 
