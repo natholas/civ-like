@@ -3,14 +3,16 @@ import { GameTile, GameUnit } from "../types";
 import { findPathLength } from "./find-path-length";
 import { UNIT_MOVEMENTS, UNIT_OFFSET } from "../config";
 import { tileHeight, tileWidth } from "./map-generation";
+import { adjustUnitsInTile } from "./generate-unit";
 
 export const moveUnit = (
   app: Application<Renderer>,
   unit: GameUnit,
   tile: GameTile
 ) => {
+  const oldTile = unit.tile;
   const pathLength = findPathLength(
-    unit.tile,
+    oldTile,
     tile,
     UNIT_MOVEMENTS[unit.type].tileTypes
   )!;
@@ -25,4 +27,7 @@ export const moveUnit = (
   );
   tile.units.push(unit);
   unit.tilesMovedThisTurn += pathLength;
+
+  adjustUnitsInTile(app, oldTile);
+  adjustUnitsInTile(app, tile);
 };

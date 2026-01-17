@@ -5,9 +5,12 @@ export const MAP_SIZE = 3;
 export const PLAYER_COUNT = 2;
 
 export const RESOURCE_ICON_SIZE = 0.4;
-export const UNIT_ICON_SIZE = 0.6;
+export const UNIT_ICON_SIZE = 0.5;
 export const UNIT_OFFSET = 0.1;
-export const UNIT_INDICATOR_OFFSET = 100;
+export const UNIT_INDICATOR_OFFSET = 105;
+export const HEALTH_BAR_WIDTH = 100;
+export const HEALTH_BAR_HEIGHT = 20;
+export const HEALTH_BAR_OFFSET = 165;
 
 export const TILE_TYPE_WEIGHTS: { [key: string]: number } = {
   grass: 5,
@@ -94,4 +97,5 @@ export const COLORS = {
   movementTileFillColor: new Color({ r: 255, g: 255, b: 255, a: 0.1 }),
   attackTileBorderColor: new Color({ r: 255, g: 0, b: 0 }),
   attackTileFillColor: new Color({ r: 255, g: 0, b: 0, a: 0.3 }),
+  healthBarColor: new Color({ r: 255, g: 0, b: 0 }),
 };

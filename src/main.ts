@@ -149,7 +149,8 @@ const setupUi = (
   );
   endTurn(players);
   const unit = spawnUnit(app, players, centerTile, "soldier");
-
+  spawnUnit(app, players, centerTile, "soldier");
+  spawnUnit(app, players, centerTile, "soldier");
   selectUnit(app, players, unit);
 
   // const unit = generateUnit(app, centerTile, "builder");

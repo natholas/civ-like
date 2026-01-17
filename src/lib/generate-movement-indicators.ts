@@ -1,5 +1,5 @@
 import { Application, Renderer, Sprite } from "pixi.js";
-import { UNIT_MOVEMENTS } from "../config";
+import { UNIT_MOVEMENTS, UNIT_PASSIVE_MAP } from "../config";
 import { GameTile, GameUnit } from "../types";
 import { getTileNeighbors } from "./get-tile-neighbors";
 import { miscTextures } from "./textures";
@@ -19,7 +19,17 @@ const calcMovementTiles = (unit: GameUnit) => {
     tilesToCheck.forEach((tile) => {
       const neighbors = getTileNeighbors(tile.tile);
       neighbors.forEach((neighbor) => {
-        if (neighbor.units.length) return;
+        if (
+          neighbor.units.filter((u) => {
+            // passive units can move on top of other passive units, and vise versa
+            // if they are from the same player
+            if (u.player !== unit.player) return true;
+            if (UNIT_PASSIVE_MAP[u.type] === UNIT_PASSIVE_MAP[unit.type])
+              return true;
+            return false; // false means it will be allowed
+          }).length
+        )
+          return;
         if (!movementData.tileTypes.includes(neighbor.type)) return;
         if (validTiles.some((t) => t.tile === neighbor)) return;
         validTiles.push({ tile: neighbor, movementLeft });

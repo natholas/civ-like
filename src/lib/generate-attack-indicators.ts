@@ -11,7 +11,11 @@ const calcAttackTiles = (
 ) => {
   if (UNIT_PASSIVE_MAP[unit.type]) return [];
   const movementData = UNIT_MOVEMENTS[unit.type];
-  const attackTiles: { tile: GameTile; attackFromTile: GameTile }[] = [];
+  const attackTiles: {
+    tile: GameTile;
+    attackFromTile: GameTile;
+    movementLeft: number;
+  }[] = [];
 
   movementTiles.forEach((tile) => {
     if (tile.movementLeft <= 0) return;
@@ -22,14 +26,24 @@ const calcAttackTiles = (
         (u) => u.player !== unit.player
       );
       if (!otherPlayerUnits.length) return;
-      if (attackTiles.some((t) => t.tile === neighbor)) return;
+      const existingAttackTile = attackTiles.find((t) => t.tile === neighbor);
+      if (existingAttackTile) {
+        if (existingAttackTile.movementLeft < tile.movementLeft) {
+          return;
+        } else {
+          attackTiles.splice(attackTiles.indexOf(existingAttackTile), 1);
+        }
+      }
 
       const attackingFromUnitTile = getTileNeighbors(unit.tile).includes(
         neighbor
       );
-
       const attackFromTile = attackingFromUnitTile ? unit.tile : tile.tile;
-      attackTiles.push({ tile: neighbor, attackFromTile });
+      attackTiles.push({
+        tile: neighbor,
+        attackFromTile,
+        movementLeft: tile.movementLeft,
+      });
     });
   });
 
