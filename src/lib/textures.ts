@@ -29,3 +29,10 @@ export const iconTextures = {
 export const miscTextures = {
   empty: await Assets.load("/assets/tile-empty.svg"),
 } as const;
+
+export const structureTextures = {
+  cityCenter: await Assets.load("/assets/city-center.svg"),
+  farm: await Assets.load("/assets/city-center.svg"),
+  mine: await Assets.load("/assets/city-center.svg"),
+  lumberMill: await Assets.load("/assets/city-center.svg"),
+} as const;

@@ -7,6 +7,7 @@ export const generatePlayers = () => {
     players.push({
       name: `Player ${i}`,
       units: [],
+      cities: [],
       active: false,
       color: PLAYER_COLORS[i],
     });

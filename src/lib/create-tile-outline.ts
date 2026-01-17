@@ -1,11 +1,12 @@
-import { Application, Graphics, Renderer } from "pixi.js";
+import { Application, Color, Graphics, Renderer } from "pixi.js";
 import { GameTile } from "../types";
 import { tileHeight, tileWidth } from "./map-generation";
-import { COLORS } from "../config";
 
 export const createTileOutline = (
   app: Application<Renderer>,
-  tiles: GameTile[]
+  tiles: GameTile[],
+  strokeColor: Color,
+  fillColor?: Color
 ) => {
   const tileSide = tileWidth / 1.73;
   const lines: [[number, number], [number, number]][] = [];
@@ -129,8 +130,11 @@ export const createTileOutline = (
 
   border.closePath();
 
-  border.stroke({ color: COLORS.movementTileBorderColor, width: 8 });
-  border.fill({ color: COLORS.movementTileFillColor, width: 8 });
+  border.stroke({ color: strokeColor, width: 8 });
+  if (fillColor) {
+    border.fill({ color: fillColor, width: 8 });
+  }
+
   app.stage.addChild(border);
   return border;
 };

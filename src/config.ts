@@ -6,6 +6,7 @@ export const PLAYER_COUNT = 2;
 
 export const RESOURCE_ICON_SIZE = 0.4;
 export const UNIT_ICON_SIZE = 0.5;
+export const STRUCTURE_ICON_SIZE = 0.7;
 export const UNIT_OFFSET = 0.1;
 export const UNIT_INDICATOR_OFFSET = 105;
 export const HEALTH_BAR_WIDTH = 100;
@@ -46,6 +47,23 @@ export const RESOURCE_TILE_MAP: {
     { type: "rocks", weight: 1 },
   ],
   mountainPeak: [],
+};
+
+export const STRUCTURE_PLACEMENT_MAP: {
+  [type: string]: { resourceTypes?: ResourceType[]; tileTypes?: TileType[] };
+} = {
+  farm: {
+    resourceTypes: ["food", "nothing"],
+    tileTypes: ["grass"],
+  },
+  mine: {
+    resourceTypes: ["rocks", "nothing"],
+    tileTypes: ["mountain"],
+  },
+  lumberMill: {
+    resourceTypes: ["trees"],
+  },
+  cityCenter: {},
 };
 
 export const UNIT_MOVEMENTS: {
