@@ -48,6 +48,15 @@ export const generateUnit = (
   };
   tile.units.push(unit);
 
+  drawUnitIndicator(unit);
+
+  return unit;
+};
+
+export const drawUnitIndicator = (unit: GameUnit) => {
+  if (unit.sprite.children[0]) {
+    unit.sprite.children[0].destroy();
+  }
   const indicator = new Graphics();
   indicator.circle(0, -UNIT_INDICATOR_OFFSET, 32);
   indicator.fill({ color: COLORS.unitIndicatorBorder });
@@ -60,10 +69,8 @@ export const generateUnit = (
 
   indicator.circle(0, -UNIT_INDICATOR_OFFSET, 28);
 
-  indicator.fill({ color: player.color });
+  indicator.fill({ color: unit.player.color });
 
-  sprite.addChild(indicator);
+  unit.sprite.addChild(indicator);
   indicator.addChild(iconSprite);
-
-  return unit;
 };

@@ -9,17 +9,20 @@ export const findPathLength = (
   const validTiles = new Set<GameTile>([start]);
   let length = 0;
 
-  while (true) {
+  while (length < 100) {
     length += 1;
     const tilesToCheck = Array.from(validTiles);
+
     tilesToCheck.forEach((tile) => {
       const neighbors = getTileNeighbors(tile);
       neighbors.forEach((neighbor) => {
-        if (neighbor.units.length) return;
+        if (neighbor.units.length && neighbor !== end) return;
         if (!allowedTileTypes.includes(neighbor.type)) return;
         validTiles.add(neighbor);
       });
     });
     if (validTiles.has(end)) return length;
   }
+
+  console.error("Couldnt find path to target tile");
 };

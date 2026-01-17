@@ -1,6 +1,7 @@
 import { Application, Graphics, Renderer } from "pixi.js";
 import { GameTile } from "../types";
 import { tileHeight, tileWidth } from "./map-generation";
+import { COLORS } from "../config";
 
 export const createTileOutline = (
   app: Application<Renderer>,
@@ -128,7 +129,8 @@ export const createTileOutline = (
 
   border.closePath();
 
-  border.stroke({ color: 0xffffff, width: 8 });
+  border.stroke({ color: COLORS.movementTileBorderColor, width: 8 });
+  border.fill({ color: COLORS.movementTileFillColor, width: 8 });
   app.stage.addChild(border);
   return border;
 };

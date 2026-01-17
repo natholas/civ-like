@@ -65,6 +65,13 @@ export const UNIT_BASE_HEALTH: {
   soldier: 200,
 };
 
+export const UNIT_BASE_ATTACK: {
+  [type: string]: number;
+} = {
+  builder: 0,
+  soldier: 150,
+};
+
 export const UNIT_PASSIVE_MAP: {
   [type: string]: boolean;
 } = {
@@ -81,6 +88,10 @@ export const PLAYER_COLORS: Color[] = [
   new Color({ r: 255, g: 0, b: 255 }),
 ];
 
-export const COLORS: { [key: string]: Color } = {
+export const COLORS = {
   unitIndicatorBorder: new Color({ r: 0, g: 0, b: 0 }),
+  movementTileBorderColor: new Color({ r: 255, g: 255, b: 255 }),
+  movementTileFillColor: new Color({ r: 255, g: 255, b: 255, a: 0.1 }),
+  attackTileBorderColor: new Color({ r: 255, g: 0, b: 0 }),
+  attackTileFillColor: new Color({ r: 255, g: 0, b: 0, a: 0.3 }),
 };

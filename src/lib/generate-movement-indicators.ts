@@ -7,26 +7,29 @@ import { tileHeight, tileWidth } from "./map-generation";
 
 const calcMovementTiles = (unit: GameUnit) => {
   const movementData = UNIT_MOVEMENTS[unit.type];
-  let movementLeft = movementData.tilesPerTurn;
+  let movementLeft = movementData.tilesPerTurn - unit.tilesMovedThisTurn;
 
-  const validTiles = new Set<GameTile>([unit.tile]);
+  const validTiles: { tile: GameTile; movementLeft: number }[] = [
+    { tile: unit.tile, movementLeft },
+  ];
 
-  while (movementLeft > unit.tilesMovedThisTurn) {
+  while (movementLeft > 0) {
     movementLeft -= 1;
     const tilesToCheck = Array.from(validTiles);
     tilesToCheck.forEach((tile) => {
-      const neighbors = getTileNeighbors(tile);
+      const neighbors = getTileNeighbors(tile.tile);
       neighbors.forEach((neighbor) => {
         if (neighbor.units.length) return;
         if (!movementData.tileTypes.includes(neighbor.type)) return;
-        validTiles.add(neighbor);
+        if (validTiles.some((t) => t.tile === neighbor)) return;
+        validTiles.push({ tile: neighbor, movementLeft });
       });
     });
   }
 
-  validTiles.delete(unit.tile);
+  validTiles.splice(0, 1);
 
-  return Array.from(validTiles);
+  return validTiles;
 };
 
 export const generateMovementIndicators = (
@@ -35,7 +38,7 @@ export const generateMovementIndicators = (
 ) => {
   const tiles = calcMovementTiles(unit);
 
-  return tiles.map((tile) => {
+  return tiles.map(({ tile, movementLeft }) => {
     const sprite = new Sprite(miscTextures["empty"]);
     sprite.width = tileWidth;
     sprite.height = tileHeight;
@@ -55,6 +58,7 @@ export const generateMovementIndicators = (
     return {
       sprite,
       tile,
+      movementLeft,
     };
   });
 };

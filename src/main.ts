@@ -1,16 +1,28 @@
 import { Application, Graphics, Renderer, Sprite } from "pixi.js";
-import { generateMap, tileHeight, tileWidth } from "./lib/map-generation";
+import { generateMap } from "./lib/map-generation";
 import { GamePlayer, GameTile, GameUnit, UnitType } from "./types";
 import { generateUnit } from "./lib/generate-unit";
 import { generateMovementIndicators } from "./lib/generate-movement-indicators";
-import { findPathLength } from "./lib/find-path-length";
-import { UNIT_MOVEMENTS, UNIT_OFFSET } from "./config";
 import { createTileOutline } from "./lib/create-tile-outline";
 import { generatePlayers } from "./lib/generate-players";
+import { generateAttackIndicators } from "./lib/generate-attack-indicators";
+import { createTileOutlines } from "./lib/create-tile-outlines";
+import { handleAttack } from "./lib/handle-attack";
+import { moveUnit } from "./lib/move-unit";
 
 let selectedUnit: GameUnit | undefined;
-let movementIndicators: { sprite: Sprite; tile: GameTile }[] = [];
+let movementIndicators: {
+  sprite: Sprite;
+  tile: GameTile;
+  movementLeft: number;
+}[] = [];
+let attackIndicators: {
+  sprite: Sprite;
+  tile: GameTile;
+  attackFromTile: GameTile;
+}[] = [];
 let movementBorder: Graphics;
+let attackBorders: Graphics;
 
 const unselectUnit = () => {
   if (!selectedUnit) return;
@@ -20,35 +32,22 @@ const unselectUnit = () => {
   });
   movementIndicators = [];
   movementBorder.destroy();
+
+  attackIndicators.forEach((indicator) => {
+    indicator.sprite.destroy();
+  });
+  attackIndicators = [];
+  attackBorders.destroy();
   selectedUnit = undefined;
 };
 
-const moveUnit = (
+const selectUnit = (
   app: Application<Renderer>,
-  unit: GameUnit,
-  tile: GameTile
+  players: GamePlayer[],
+  unit: GameUnit
 ) => {
-  const pathLength = findPathLength(
-    unit.tile,
-    tile,
-    UNIT_MOVEMENTS[unit.type].tileTypes
-  );
-  unit.tile.units = unit.tile.units.filter((u) => u !== unit);
-  unit.tile = tile;
-  unit.sprite.position.set(
-    app.screen.width / 2 + tile.offset[0] * tileWidth,
-    app.screen.height / 2 +
-      tile.offset[1] * tileHeight +
-      tileHeight * UNIT_OFFSET
-  );
-  tile.units.push(unit);
-  unit.tilesMovedThisTurn += pathLength;
-};
-
-const selectUnit = (app: Application<Renderer>, unit: GameUnit) => {
   unselectUnit();
   selectedUnit = unit;
-  selectedUnit.sprite.alpha = 0.5;
   movementIndicators = generateMovementIndicators(app, unit);
   movementBorder = createTileOutline(app, [
     ...movementIndicators.map((i) => i.tile),
@@ -59,6 +58,20 @@ const selectUnit = (app: Application<Renderer>, unit: GameUnit) => {
     indicator.sprite.on("click", () => {
       unselectUnit();
       moveUnit(app, unit, indicator.tile);
+    });
+  });
+
+  attackIndicators = generateAttackIndicators(app, unit, movementIndicators);
+  attackBorders = createTileOutlines(
+    app,
+    attackIndicators.map((i) => i.tile)
+  );
+
+  attackIndicators.forEach((indicator) => {
+    indicator.sprite.interactive = true;
+    indicator.sprite.on("click", () => {
+      handleAttack(app, unit, indicator.tile, indicator.attackFromTile);
+      unselectUnit();
     });
   });
 };
@@ -87,10 +100,11 @@ const spawnUnit = (
   unit.sprite.on("click", () => {
     const activePlayer = players.find((p) => p.active);
     if (activePlayer === unit.player) {
-      selectUnit(app, unit);
+      selectUnit(app, players, unit);
     }
   });
   activePlayer.units.push(unit);
+  return unit;
 };
 
 const setupUi = (
@@ -125,6 +139,18 @@ const setupUi = (
   const { centerTile } = generateMap(app);
 
   setupUi(app, players, centerTile);
+
+  spawnUnit(app, players, centerTile.rightNeighbor!.rightNeighbor!, "builder");
+  spawnUnit(
+    app,
+    players,
+    centerTile.rightNeighbor!.topLeftNeighbor!.topRightNeighbor!,
+    "soldier"
+  );
+  endTurn(players);
+  const unit = spawnUnit(app, players, centerTile, "soldier");
+
+  selectUnit(app, players, unit);
 
   // const unit = generateUnit(app, centerTile, "builder");
 
